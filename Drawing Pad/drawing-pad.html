@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itay Fliess - Enhanced Drawing Pad</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Poppins:wght@300;400;500;600;700&family=VT323&family=Inconsolata:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    <link rel="stylesheet" href="home-page.css">
+    <link rel="stylesheet" href="drawing-pad.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'sans': ['Poppins', 'sans-serif'],
+                        'mono': ['Fira Code', 'monospace'],
+                        'drawing': ['Inter', 'sans-serif']
+                    },
+                    colors: {
+                        dark: {
+                            bg: '#0d1117',
+                            text: '#f0f6fc',
+                            primary: '#58a6ff',
+                            secondary: '#161b22',
+                            highlight: '#1f6feb',
+                            'btn-text': '#ffffff',
+                        },
+                        light: {
+                            bg: '#ffffff',
+                            text: '#24292e',
+                            primary: '#0366d6',
+                            secondary: '#f6f8fa',
+                            highlight: '#2188ff',
+                            'btn-text': '#ffffff',
+                        }
+                    },
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Drawing Pad Theme Integration Styles */
+        body.dark {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+        }
+        
+        .dark .app-container {
+            background-color: var(--bg-secondary);
+        }
+        
+        .dark .toolbar {
+            background-color: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+        
+        .dark .tool-group {
+            border-right-color: var(--border-color);
+        }
+        
+        .dark .tool-label {
+            color: var(--text-primary);
+        }
+        
+        .dark .tool-btn {
+            background-color: var(--bg-secondary);
+            border-color: var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .dark .tool-btn:hover {
+            background-color: var(--bg-tertiary);
+        }
+        
+        .dark .tool-btn.active {
+            background-color: var(--accent-primary);
+        }
+        
+        .dark .status-bar {
+            background-color: var(--bg-tertiary);
+            color: var(--text-secondary);
+        }
+        
+        .dark .canvas-container canvas {
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark .modal-content {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+        
+        .dark .modal-content label,
+        .dark .modal-content select,
+        .dark .modal-content input {
+            color: var(--text-primary);
+        }
+        
+        .dark #closeSettingsBtn {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .dark #applySettingsBtn {
+            background-color: var(--accent-primary);
+        }
+        
+        /* Integration specific adjustments */
+        .app-header {
+            padding-top: 80px;
+        }
+
+        .drawing-wrapper {
+            min-height: calc(100vh - 80px);
+            padding: 1rem 0 3rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        /* Responsive fixes for the integration */
+        @media (max-width: 768px) {
+            .app-header {
+                padding-top: 100px;
+            }
+            
+            .drawing-wrapper {
+                padding: 0.5rem 0 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-light-bg/80 dark:bg-dark-bg/80 backdrop-blur-sm shadow-sm transition-colors duration-300">
+        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
+            <a href="home-page.html" id="logo" class="text-xl font-bold text-light-text dark:text-dark-text transition-colors hover:text-light-primary dark:hover:text-dark-primary" aria-label="Homepage">
+                <span class="logo-text">ITAY FLIESS</span>
+            </a>
+            
+            <div class="flex items-center">
+                <div class="flex mr-6 space-x-6">
+                    <a href="about-me.html" class="hover:text-light-primary dark:hover:text-dark-primary transition-colors duration-200">About Me</a>
+                    <a href="projects.html" class="hover:text-light-primary dark:hover:text-dark-primary transition-colors duration-200">Projects</a>
+                    <a href="#" id="terminal-nav-link" class="hover:text-light-primary dark:hover:text-dark-primary transition-colors duration-200">Terminal</a>
+                    <a href="contact.html" class="hover:text-light-primary dark:hover:text-dark-primary transition-colors duration-200">Contact</a>
+                </div>
+                
+                <!-- Theme Toggle Button - repositioned -->
+                <div class="border-l border-gray-300 dark:border-gray-700 pl-5 ml-1">
+                    <button id="theme-toggle" class="focus:outline-none" aria-label="Toggle Dark/Light Theme">
+                        <div class="theme-toggle">
+                            <input type="checkbox" id="theme-switch">
+                            <label for="theme-switch" class="switch-label">
+                                <i class="fas fa-moon"></i>
+                                <i class="fas fa-sun"></i>
+                                <span class="toggle-ball"></span>
+                            </label>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="drawing-wrapper">
+        <div class="app-container">
+            <div class="app-header">
+                <h1 class="text-2xl font-semibold text-light-text dark:text-dark-text mb-1">Enhanced Drawing Pad</h1>
+                <p class="text-sm text-light-text/80 dark:text-dark-text/80 mb-4">Create beautiful digital art in your browser</p>
+            </div>
+
+            <div class="toolbar">
+                <div class="tool-group">
+                    <span class="tool-label">Tools:</span>
+                    <button id="brushTool" class="tool-btn active tooltip" data-tooltip="Brush (B)">
+                        <i class="fas fa-paint-brush"></i>
+                    </button>
+                    <button id="eraserTool" class="tool-btn tooltip" data-tooltip="Eraser (E)">
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                    <button id="fillTool" class="tool-btn tooltip" data-tooltip="Fill (F)">
+                        <i class="fas fa-fill-drip"></i>
+                    </button>
+                </div>
+
+                <div class="tool-group">
+                    <span class="tool-label">Color:</span>
+                    <input type="color" id="colorPicker" value="#000000" class="tooltip" data-tooltip="Select color" />
+                    <div class="flex space-x-1">
+                        <div class="w-6 h-6 rounded-full bg-black cursor-pointer border border-gray-300" data-color="#000000"></div>
+                        <div class="w-6 h-6 rounded-full bg-white cursor-pointer border border-gray-300" data-color="#FFFFFF"></div>
+                        <div class="w-6 h-6 rounded-full bg-red-500 cursor-pointer border border-gray-300" data-color="#EF4444"></div>
+                        <div class="w-6 h-6 rounded-full bg-blue-500 cursor-pointer border border-gray-300" data-color="#3B82F6"></div>
+                        <div class="w-6 h-6 rounded-full bg-green-500 cursor-pointer border border-gray-300" data-color="#10B981"></div>
+                    </div>
+                </div>
+
+                <div class="tool-group">
+                    <span class="tool-label">Size:</span>
+                    <input type="range" id="brushSize" min="1" max="50" value="5" class="tooltip" data-tooltip="Adjust brush size" />
+                    <span id="brushSizeValue">5</span>
+                    <div id="brushPreview" class="brush-preview" style="width: 5px; height: 5px;"></div>
+                </div>
+
+                <div class="tool-group">
+                    <span class="tool-label">Actions:</span>
+                    <button id="undoBtn" class="tool-btn tooltip" data-tooltip="Undo (Ctrl+Z)">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button id="redoBtn" class="tool-btn tooltip" data-tooltip="Redo (Ctrl+Y)">
+                        <i class="fas fa-redo"></i>
+                    </button>
+                    <button id="clearCanvas" class="tool-btn tooltip" data-tooltip="Clear canvas">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+
+                <div class="tool-group">
+                    <button id="saveBtn" class="tool-btn tooltip" data-tooltip="Save as PNG">
+                        <i class="fas fa-download"></i>
+                    </button>
+                    <button id="fullscreenBtn" class="tool-btn tooltip" data-tooltip="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button id="settingsBtn" class="tool-btn tooltip" data-tooltip="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="canvas-container">
+                <canvas id="drawingCanvas" width="800" height="600"></canvas>
+            </div>
+
+            <div class="status-bar">
+                <div id="coordinates">Position: 0, 0</div>
+                <div id="zoomLevel">Zoom: 100%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-6 bg-light-secondary dark:bg-dark-secondary text-center text-sm text-light-text/60 dark:text-dark-text/60 transition-colors duration-300">
+        <div class="footer-content container mx-auto flex flex-col md:flex-row justify-between items-center px-6">
+            <p>&copy; <span id="current-year"></span> Itay Fliess. All rights reserved.</p>
+            <div class="social-links flex space-x-4 mt-4 md:mt-0">
+                <a href="#" class="social-link text-light-text/60 dark:text-dark-text/60 hover:text-light-primary dark:hover:text-dark-primary transition-colors">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="#" class="social-link text-light-text/60 dark:text-dark-text/60 hover:text-light-primary dark:hover:text-dark-primary transition-colors">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                <a href="#" class="social-link text-light-text/60 dark:text-dark-text/60 hover:text-light-primary dark:hover:text-dark-primary transition-colors">
+                    <i class="fab fa-twitter"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Settings</div>
+            <div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Theme</label>
+                    <select id="themeSelect" class="w-full p-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-dark-secondary rounded-md">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Canvas Background</label>
+                    <select id="backgroundSelect" class="w-full p-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-dark-secondary rounded-md">
+                        <option value="white">White</option>
+                        <option value="transparent">Transparent</option>
+                        <option value="grid">Grid</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <input type="checkbox" id="smoothingCheck" class="mr-2" checked />
+                        Enable line smoothing
+                    </label>
+                </div>
+                <div class="mb-3">
+                    <label class="flex items-center text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <input type="checkbox" id="autosaveCheck" class="mr-2" />
+                        Enable autosave (every 30 seconds)
+                    </label>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="closeSettingsBtn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600">Close</button>
+                <button id="applySettingsBtn" class="px-4 py-2 bg-blue-600 dark:bg-dark-primary text-white rounded-md hover:bg-blue-700 dark:hover:bg-dark-highlight">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terminal overlay -->
+    <div class="terminal-overlay" id="terminal-overlay">
+        <div class="crt-overlay"></div>
+        <div class="glitch-effect"></div>
+        
+        <!-- Terminal container -->
+        <div class="terminal-container">
+            <div class="terminal closed" id="terminal">
+                <div class="terminal-header">
+                    <div class="terminal-title">
+                        <i class="fas fa-terminal"></i>
+                        <span>PORTFOLIO TERMINAL</span>
+                    </div>
+                    <div class="terminal-controls">
+                        <span class="minimize" title="Minimize">_</span>
+                        <span class="maximize" title="Maximize">□</span>
+                        <span class="close" title="Close">×</span>
+                    </div>
+                </div>
+                <div class="terminal-content">
+                    <div id="output" class="output"></div>
+                    <div class="input-line" id="input-line">
+                        <span class="prompt" id="prompt">user@portfolio:~$</span>
+                        <input type="text" id="input-field" class="input-field" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                        <span class="cursor" id="cursor"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cursor Trail Canvas -->
+    <canvas id="cursor-trail" class="cursor-trail-canvas"></canvas>
+
+    <!-- Audio Controls -->
+    <div class="audio-controls">
+        <button id="toggle-audio" title="Toggle Audio">
+            <i class="fas fa-volume-up"></i>
+        </button>
+    </div>
+    
+    <!-- Audio files -->
+    <audio id="keypress" src="audio/keypress.mp3" preload="auto"></audio>
+    <audio id="keypress-alt" src="audio/keypress-alt.mp3" preload="auto"></audio>
+    <audio id="keypress-return" src="audio/keypress-return.mp3" preload="auto"></audio>
+    <audio id="enter" src="audio/enter.mp3" preload="auto"></audio>
+    <audio id="access-granted" src="audio/access-granted.mp3" preload="auto"></audio>
+    <audio id="access-denied" src="audio/access-denied.mp3" preload="auto"></audio>
+    <audio id="ambient" src="audio/ambient.mp3" preload="auto" loop></audio>
+    <audio id="error" src="audio/error.mp3" preload="auto"></audio>
+    <audio id="success" src="audio/success.mp3" preload="auto"></audio>
+    <audio id="startup" src="audio/startup.mp3" preload="auto"></audio>
+
+    <!-- Scripts -->
+    <script src="home-page.js"></script>
+    <script src="terminal.js"></script>
+    <script src="drawing-pad-enhanced.js"></script>
+</body>
+</html>
